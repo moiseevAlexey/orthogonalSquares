@@ -33,27 +33,21 @@ public class LatinSquare {
         }
     }
 
-    private class Transversal {
-
-        private ArrayList<Elem> transversal;
-
-        Transversal() {
-            this.transversal = new ArrayList();
-        }
-
+    private class Transversal extends ArrayList<Elem>{
         @Override
         public boolean equals(Object obj) {
             Transversal t = (Transversal) obj;
-            for (Elem e : transversal) {
-                if (t.transversal.contains(e)) {
+            for (Elem e : this) {
+                int k = 0;
+                if (t.contains(e)) {
                     return true;
                 }
             }
             return false;
         }
 
-        private boolean contains(Elem e) {
-            for (Elem el : buffer.transversal) {
+        private boolean crosses(Elem e) {
+            for (Elem el : this) {
                 if (e.crosses(el)) return true;
             }
             return false;
@@ -113,18 +107,17 @@ public class LatinSquare {
 
     private void findTransversals(int depth) {
         if (depth == size) {
-            Transversal t = new Transversal();
-            t.transversal = (ArrayList<Elem>) buffer.transversal.clone();
+            Transversal t = (Transversal) buffer.clone();
             transversals.add(t);
             return;
         }
 
         for (int i = 0; i < size; i++) {
             Elem e = new Elem(i, depth, square[i][depth]);
-            if (!buffer.contains(e)) {
-                buffer.transversal.add(e);
+            if (!buffer.crosses(e)) {
+                buffer.add(e);
                 findTransversals(depth + 1);
-                buffer.transversal.remove(e);
+                buffer.remove(e);
             }
         }
     }
@@ -134,7 +127,7 @@ public class LatinSquare {
             ortSquaresNumber++;
             int[][] newSquare = new int[size][size];
             for (int i = 0; i < size; i++) {
-                for (Elem e : currentSquare.get(i).transversal) {
+                for (Elem e : currentSquare.get(i)) {
                     newSquare[e.i][e.j] = i;
                 }
             }
@@ -150,7 +143,7 @@ public class LatinSquare {
         }
 
         for (int i = k; i < transversals.size(); i++) {
-            if ((transversals.get(i).transversal.get(0).i == depth) && (!currentSquare.contains(transversals.get(i)))) {
+            if ((transversals.get(i).get(0).i == depth) && (!currentSquare.contains(transversals.get(i)))) {
                 currentSquare.add(transversals.get(i));
                 findOrthogonalSquares(depth + 1, k + 1);
                 currentSquare.remove(transversals.get(i));
